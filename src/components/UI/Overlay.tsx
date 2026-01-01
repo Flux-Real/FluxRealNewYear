@@ -67,110 +67,6 @@ interface Sparkle {
 
 const SPARKLE_COLORS = ['#F5A623', '#E8883A', '#FFC966', '#FFB347'];
 
-// Explosion sparkles for stage 2
-function ExplosionSparkles() {
-  const currentStage = usePeakStore((s) => s.currentStage);
-  const [particles, setParticles] = useState<Sparkle[]>([]);
-  const idRef = useRef(0);
-  const hasTriggeredRef = useRef(false);
-
-  useEffect(() => {
-    if (currentStage === 2 && !hasTriggeredRef.current) {
-      hasTriggeredRef.current = true;
-
-      // Create multiple bursts over time
-      const createBurst = (delay: number, intensity: number) => {
-        setTimeout(() => {
-          const newParticles: Sparkle[] = [];
-          const count = 15 + Math.floor(Math.random() * 10 * intensity);
-
-          // Explosion origin - left side of screen, roughly middle height
-          const originX = window.innerWidth * 0.15;
-          const originY = window.innerHeight * 0.45;
-
-          for (let i = 0; i < count; i++) {
-            newParticles.push({
-              id: idRef.current++,
-              x: originX + (Math.random() - 0.5) * 100,
-              y: originY + (Math.random() - 0.5) * 150,
-              size: 6 + Math.random() * 14 * intensity,
-              color: SPARKLE_COLORS[Math.floor(Math.random() * SPARKLE_COLORS.length)],
-              duration: 0.8 + Math.random() * 0.8,
-              delay: Math.random() * 0.2,
-              rotation: Math.random() * 360,
-            });
-          }
-
-          setParticles(prev => [...prev, ...newParticles]);
-
-          // Clean up after animation
-          setTimeout(() => {
-            setParticles(prev => prev.filter(p => !newParticles.find(np => np.id === p.id)));
-          }, 2000);
-        }, delay);
-      };
-
-      // Multiple bursts to match explosion sequence
-      createBurst(200, 0.6);
-      createBurst(500, 1);
-      createBurst(900, 0.8);
-      createBurst(1300, 0.5);
-      createBurst(1600, 0.3);
-    }
-
-    // Reset when leaving stage 2
-    if (currentStage !== 2) {
-      hasTriggeredRef.current = false;
-    }
-  }, [currentStage]);
-
-  if (currentStage !== 2) return null;
-
-  return (
-    <div className="fixed inset-0 pointer-events-none z-40">
-      <AnimatePresence>
-        {particles.map((particle) => {
-          const angle = (Math.random() - 0.3) * Math.PI; // Bias toward right/up
-          const distance = 80 + Math.random() * 200;
-          return (
-            <motion.div
-              key={particle.id}
-              className="absolute"
-              style={{
-                left: particle.x,
-                top: particle.y,
-                width: particle.size,
-                height: particle.size,
-              }}
-              initial={{ scale: 0, opacity: 0, rotate: particle.rotation }}
-              animate={{
-                scale: [0, 1.5, 1, 0],
-                opacity: [0, 1, 0.8, 0],
-                x: Math.cos(angle) * distance,
-                y: Math.sin(angle) * distance - 50,
-                rotate: particle.rotation + 360,
-              }}
-              transition={{
-                duration: particle.duration,
-                delay: particle.delay,
-                ease: [0.25, 0.46, 0.45, 0.94],
-              }}
-            >
-              <svg width="100%" height="100%" viewBox="0 0 12 12">
-                <path
-                  d="M6 0L7.2 4.2L12 6L7.2 7.8L6 12L4.8 7.8L0 6L4.8 4.2L6 0Z"
-                  fill={particle.color}
-                  style={{ filter: `drop-shadow(0 0 ${particle.size / 2}px ${particle.color})` }}
-                />
-              </svg>
-            </motion.div>
-          );
-        })}
-      </AnimatePresence>
-    </div>
-  );
-}
-
 function TouchSparkles() {
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
   const idRef = useRef(0);
@@ -698,7 +594,6 @@ export default function Overlay() {
   return (
     <div className="absolute inset-0 z-10">
       <TouchSparkles />
-      <ExplosionSparkles />
       <SoundToggle />
 
       <AnimatePresence mode="wait">
