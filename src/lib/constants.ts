@@ -33,6 +33,6 @@ export const CTA = {
   cta: "LET'S BUILD THE EXTRAORDINARY.",
   button: {
     text: 'SCHEDULE A 2026 SYNC',
-    url: 'mailto:connect@fluxreal.com',
+    url: 'https://calendar.app.google/j8KygZHUKC8Lsv2w7',
   },
 } as const;

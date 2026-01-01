@@ -527,14 +527,17 @@ function CTAOverlay() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.9 + index * 0.1, ease: smoothEase }}
-              className="flex items-center gap-3 text-sm md:text-base"
+              className="flex items-start gap-3"
             >
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#F5A623' }} />
-              <span className="text-white/80 font-light">{event.name}</span>
-              <span style={{ color: 'rgba(245,166,35,0.3)' }}>—</span>
-              <span className="text-white/50">{event.location}</span>
-              <span style={{ color: 'rgba(245,166,35,0.3)' }}>—</span>
-              <span style={{ color: '#F5A623' }} className="font-medium">{event.dates}</span>
+              <span className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style={{ background: '#F5A623' }} />
+              <div className="flex flex-col">
+                <span className="text-white/90 font-light text-sm md:text-base">{event.name}</span>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-white/50 text-xs md:text-sm">{event.location}</span>
+                  <span style={{ color: 'rgba(245,166,35,0.4)' }} className="text-xs">•</span>
+                  <span style={{ color: '#F5A623' }} className="font-semibold text-xs md:text-sm">{event.dates}</span>
+                </div>
+              </div>
             </motion.div>
           ))}
         </motion.div>
