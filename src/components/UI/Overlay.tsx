@@ -529,23 +529,44 @@ function CTAOverlay() {
   );
 }
 
-// Sound toggle
+// Sound toggle - minimal
 function SoundToggle() {
   const soundEnabled = usePeakStore((s) => s.soundEnabled);
   const toggleSound = usePeakStore((s) => s.toggleSound);
-  
+
   return (
-    <button
+    <motion.button
       onClick={(e) => {
         e.stopPropagation();
         toggleSound();
       }}
-      className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center
-                 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-50"
+      className="absolute top-6 right-6 w-8 h-8 flex items-center justify-center z-50"
       aria-label={soundEnabled ? 'Mute' : 'Unmute'}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 1.5 }}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.95 }}
     >
-      <span className="text-lg">{soundEnabled ? '🔊' : '🔇'}</span>
-    </button>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M11 5L6 9H2v6h4l5 4V5z"
+          stroke="rgba(255,255,255,0.4)"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill={soundEnabled ? 'rgba(245,166,35,0.3)' : 'none'}
+        />
+        {soundEnabled ? (
+          <>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" stroke="rgba(245,166,35,0.6)" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M18.07 5.93a9 9 0 0 1 0 12.14" stroke="rgba(245,166,35,0.4)" strokeWidth="1.5" strokeLinecap="round" />
+          </>
+        ) : (
+          <path d="M23 9l-6 6m0-6l6 6" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" strokeLinecap="round" />
+        )}
+      </svg>
+    </motion.button>
   );
 }
 

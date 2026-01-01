@@ -2,7 +2,7 @@
 export const FRAME_CONFIG = {
   0: { folder: 'stage-0', count: 30, loop: true, fps: 18 },
   1: { folder: 'stage-1', count: 30, loop: false, fps: 18 },
-  2: { folder: 'stage-2', count: 30, loop: false, fps: 18 },
+  2: { folder: 'stage-2', count: 30, loop: false, fps: 12 },
   3: { folder: 'stage-3', count: 30, loop: false, fps: 18 },
   4: { folder: 'stage-4', count: 30, loop: false, fps: 18 },
 } as const;

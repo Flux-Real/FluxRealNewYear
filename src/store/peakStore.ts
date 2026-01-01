@@ -19,7 +19,7 @@ interface PeakStore {
 
 export const usePeakStore = create<PeakStore>((set, get) => ({
   currentStage: 0,
-  soundEnabled: false,
+  soundEnabled: true,
   recipientName: null,
   isLoaded: false,
   loadingProgress: 0,
