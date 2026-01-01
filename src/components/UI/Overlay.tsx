@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
 import { usePeakStore } from '@/store/peakStore';
 import { CTA, STAGE_LABELS, TIMING } from '@/lib/constants';
@@ -53,49 +53,119 @@ function StageLabel() {
   );
 }
 
-// Swipe slider component
+// Sparkle effect on touch
+interface Sparkle {
+  id: number;
+  x: number;
+  y: number;
+}
+
+function TouchSparkles() {
+  const [sparkles, setSparkles] = useState<Sparkle[]>([]);
+  const idRef = useRef(0);
+
+  const createSparkle = useCallback((clientX: number, clientY: number) => {
+    const newSparkles: Sparkle[] = [];
+    // Create 6-8 sparkles per touch
+    const count = 6 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < count; i++) {
+      newSparkles.push({
+        id: idRef.current++,
+        x: clientX + (Math.random() - 0.5) * 20,
+        y: clientY + (Math.random() - 0.5) * 20,
+      });
+    }
+    setSparkles(prev => [...prev, ...newSparkles]);
+
+    // Remove sparkles after animation
+    setTimeout(() => {
+      setSparkles(prev => prev.filter(s => !newSparkles.find(ns => ns.id === s.id)));
+    }, 800);
+  }, []);
+
+  useEffect(() => {
+    const handleTouch = (e: TouchEvent) => {
+      Array.from(e.touches).forEach(touch => {
+        createSparkle(touch.clientX, touch.clientY);
+      });
+    };
+
+    const handleClick = (e: MouseEvent) => {
+      createSparkle(e.clientX, e.clientY);
+    };
+
+    window.addEventListener('touchstart', handleTouch);
+    window.addEventListener('click', handleClick);
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouch);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [createSparkle]);
+
+  return (
+    <div className="fixed inset-0 pointer-events-none z-50">
+      <AnimatePresence>
+        {sparkles.map((sparkle) => (
+          <motion.div
+            key={sparkle.id}
+            className="absolute"
+            style={{ left: sparkle.x, top: sparkle.y }}
+            initial={{ scale: 0, opacity: 1 }}
+            animate={{
+              scale: [0, 1, 0],
+              opacity: [1, 1, 0],
+              x: (Math.random() - 0.5) * 60,
+              y: (Math.random() - 0.5) * 60 - 20,
+            }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12">
+              <path
+                d="M6 0L7.5 4.5L12 6L7.5 7.5L6 12L4.5 7.5L0 6L4.5 4.5L6 0Z"
+                fill="#F5A623"
+                style={{ filter: 'drop-shadow(0 0 4px #F5A623)' }}
+              />
+            </svg>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// Minimal swipe slider component
 function SwipeSlider({ onComplete }: { onComplete: () => void }) {
   const currentStage = usePeakStore((s) => s.currentStage);
-  const [isComplete, setIsComplete] = useState(false);
-  const constraintsRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
-  const sliderWidth = 240;
-  const thumbSize = 56;
-  const maxDrag = sliderWidth - thumbSize - 8;
+  const sliderWidth = 180;
+  const thumbSize = 40;
+  const maxDrag = sliderWidth - thumbSize;
 
-  // Transforms based on drag position
-  const progress = useTransform(x, [0, maxDrag], [0, 1]);
-  const trackOpacity = useTransform(x, [0, maxDrag * 0.5, maxDrag], [0.3, 0.5, 0.8]);
-  const thumbScale = useTransform(x, [0, maxDrag], [1, 1.1]);
-  const glowIntensity = useTransform(x, [0, maxDrag], [0, 1]);
-  const progressWidth = useTransform(x, [0, maxDrag], ['0%', '100%']);
+  // Transforms
+  const progressWidth = useTransform(x, [0, maxDrag], [thumbSize, sliderWidth]);
 
   // Reset when stage changes
   useEffect(() => {
-    setIsComplete(false);
     animate(x, 0, { duration: 0.3 });
   }, [currentStage, x]);
 
   const handleDragEnd = () => {
-    const currentX = x.get();
-    if (currentX >= maxDrag * 0.85) {
-      // Complete the slide
-      setIsComplete(true);
+    if (x.get() >= maxDrag * 0.8) {
       animate(x, maxDrag, {
         type: "spring",
-        stiffness: 300,
+        stiffness: 400,
         damping: 30,
         onComplete: () => {
-          // Haptic feedback
           if (typeof navigator !== 'undefined' && navigator.vibrate) {
-            navigator.vibrate([20, 50, 20]);
+            navigator.vibrate(10);
           }
-          setTimeout(onComplete, 200);
+          setTimeout(onComplete, 150);
         }
       });
     } else {
-      // Snap back
-      animate(x, 0, { type: "spring", stiffness: 400, damping: 25 });
+      animate(x, 0, { type: "spring", stiffness: 500, damping: 30 });
     }
   };
 
@@ -103,120 +173,73 @@ function SwipeSlider({ onComplete }: { onComplete: () => void }) {
 
   return (
     <motion.div
-      className="absolute bottom-16 left-8 md:left-12"
-      initial={{ opacity: 0, y: 20 }}
+      className="absolute bottom-12 left-8 md:left-12"
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 1.5, duration: 0.6 }}
+      transition={{ delay: 1.2, duration: 0.5 }}
     >
-      {/* Backdrop for readability on bright backgrounds */}
-      <motion.div
-        className="absolute -inset-4 -top-6 rounded-2xl"
-        style={{
-          background: 'linear-gradient(135deg, rgba(5,5,5,0.7) 0%, rgba(5,5,5,0.4) 100%)',
-          backdropFilter: 'blur(8px)',
-        }}
-      />
-
       {/* Label */}
       <motion.p
-        className="relative text-xs tracking-[0.2em] mb-3 font-medium"
-        style={{
-          color: 'rgba(255,255,255,0.9)',
-          textShadow: '0 1px 3px rgba(0,0,0,0.5)',
-        }}
-        animate={{ opacity: [0.7, 1, 0.7] }}
-        transition={{ duration: 2, repeat: Infinity }}
+        className="text-[10px] tracking-[0.25em] mb-2 font-medium uppercase"
+        style={{ color: 'rgba(255,255,255,0.5)' }}
+        animate={{ opacity: [0.4, 0.7, 0.4] }}
+        transition={{ duration: 2.5, repeat: Infinity }}
       >
-        {currentStage === 0 ? 'SLIDE TO BEGIN' : 'SLIDE TO CONTINUE'}
+        {currentStage === 0 ? 'Slide' : 'Continue'}
       </motion.p>
 
-      {/* Slider track */}
+      {/* Minimal slider track */}
       <div
-        ref={constraintsRef}
-        className="relative h-14 rounded-full overflow-hidden"
+        className="relative rounded-full"
         style={{
           width: sliderWidth,
-          background: 'rgba(0,0,0,0.3)',
-          border: '1px solid rgba(255,255,255,0.15)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          height: thumbSize,
+          background: 'rgba(255,255,255,0.08)',
+          border: '1px solid rgba(255,255,255,0.1)',
         }}
       >
         {/* Progress fill */}
         <motion.div
-          className="absolute inset-y-0 left-0 rounded-full"
+          className="absolute top-0 left-0 h-full rounded-full"
           style={{
             width: progressWidth,
-            background: 'linear-gradient(90deg, rgba(245,166,35,0.1) 0%, rgba(245,166,35,0.3) 100%)',
-            opacity: trackOpacity,
+            background: 'rgba(245,166,35,0.15)',
           }}
         />
 
-        {/* Animated hint arrows */}
-        <div className="absolute inset-0 flex items-center justify-end pr-4 pointer-events-none">
-          {[0, 1, 2].map((i) => (
-            <motion.span
-              key={i}
-              className="text-sm"
-              style={{ color: 'rgba(245,166,35,0.3)', marginRight: i < 2 ? -4 : 0 }}
-              animate={{
-                opacity: [0.2, 0.5, 0.2],
-                x: [0, 4, 0],
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                delay: i * 0.15,
-              }}
-            >
-              ›
-            </motion.span>
-          ))}
+        {/* Subtle arrow hint */}
+        <div className="absolute inset-0 flex items-center justify-end pr-3 pointer-events-none">
+          <motion.span
+            className="text-xs"
+            style={{ color: 'rgba(255,255,255,0.2)' }}
+            animate={{ x: [0, 3, 0], opacity: [0.2, 0.4, 0.2] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            →
+          </motion.span>
         </div>
 
         {/* Draggable thumb */}
         <motion.div
-          className="absolute top-1 left-1 cursor-grab active:cursor-grabbing"
-          style={{
-            x,
-            width: thumbSize,
-            height: thumbSize - 8,
-            scale: thumbScale,
-          }}
+          className="absolute top-0 left-0 cursor-grab active:cursor-grabbing"
+          style={{ x, width: thumbSize, height: thumbSize }}
           drag="x"
           dragConstraints={{ left: 0, right: maxDrag }}
-          dragElastic={0.05}
+          dragElastic={0.02}
           onDragEnd={handleDragEnd}
         >
-          {/* Thumb glow */}
           <motion.div
-            className="absolute inset-0 rounded-full"
-            style={{
-              background: 'radial-gradient(circle, rgba(245,166,35,0.4) 0%, transparent 70%)',
-              opacity: glowIntensity,
-              scale: 1.5,
-            }}
-          />
-
-          {/* Thumb button */}
-          <motion.div
-            className="relative w-full h-full rounded-full flex items-center justify-center"
+            className="w-full h-full rounded-full flex items-center justify-center"
             style={{
               background: 'linear-gradient(135deg, #F5A623 0%, #E8883A 100%)',
-              boxShadow: '0 4px 20px rgba(245,166,35,0.4)',
+              boxShadow: '0 2px 12px rgba(245,166,35,0.4)',
             }}
             whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.05 }}
           >
-            <motion.span
-              className="text-lg font-bold"
-              style={{ color: '#050505' }}
-              animate={!isComplete ? { x: [0, 3, 0] } : {}}
-              transition={{ duration: 1, repeat: Infinity }}
-            >
-              →
-            </motion.span>
+            <span className="text-sm" style={{ color: '#050505' }}>→</span>
           </motion.div>
         </motion.div>
-
       </div>
     </motion.div>
   );
@@ -457,6 +480,7 @@ export default function Overlay() {
 
   return (
     <div className="absolute inset-0 z-10">
+      <TouchSparkles />
       <SoundToggle />
 
       <AnimatePresence mode="wait">
