@@ -14,16 +14,16 @@ function ProgressIndicator() {
 
   return (
     <motion.div
-      className="absolute top-6 left-8 right-8 md:left-12 md:right-12 flex items-center gap-2"
+      className="absolute top-6 left-8 right-8 md:left-12 md:right-12 flex items-center gap-3"
       initial={{ opacity: 0 }}
-      animate={{ opacity: 0.4 }}
+      animate={{ opacity: 0.7 }}
       transition={{ delay: 1, duration: 0.5 }}
     >
       {[...Array(totalStages)].map((_, index) => (
         <motion.div
           key={index}
-          className="relative flex-1 h-[1px] overflow-hidden rounded-full"
-          style={{ background: 'rgba(255,255,255,0.15)' }}
+          className="relative flex-1 h-[2px] overflow-hidden rounded-full"
+          style={{ background: 'rgba(255,255,255,0.2)' }}
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ delay: 1.1 + index * 0.1, duration: 0.4 }}
@@ -33,7 +33,7 @@ function ProgressIndicator() {
             className="absolute inset-0 rounded-full origin-left"
             style={{
               background: index <= currentStage
-                ? 'rgba(245,166,35,0.7)'
+                ? '#F5A623'
                 : 'transparent',
             }}
             initial={{ scaleX: 0 }}
