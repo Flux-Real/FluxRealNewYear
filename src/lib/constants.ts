@@ -30,7 +30,7 @@ export const CTA = {
   subtitle: 'PropTech · Expos & Events',
   subtitleHighlight: 'Hospitality',
   events: [
-    { name: 'PcVue Smart City Conference', location: '', dates: 'Jan 21' },
+    { name: 'PcVue Smart City Conference', location: 'Dubai', dates: 'Jan 21' },
     { name: 'ME PropTech Connect', location: 'Dubai', dates: 'Feb 4–5' },
     { name: 'EuroShop Trade Fair', location: 'Düsseldorf', dates: 'Feb 22–26' },
     { name: 'Arabian Travel Market', location: 'Dubai', dates: 'May 4–7' },
