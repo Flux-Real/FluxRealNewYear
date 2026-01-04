@@ -481,11 +481,11 @@ function CTAOverlay() {
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             transition={{ duration: 0.9, delay: 0.4, ease: smoothEase }}
-            className="text-2xl md:text-3xl lg:text-4xl font-extralight text-white leading-[1.2] tracking-tight"
+            className="text-2xl md:text-3xl lg:text-4xl font-extralight text-white leading-[1.3] tracking-tight"
           >
-            {CTA.title.split(':')[0]}:
+            {CTA.title}
             <br />
-            <span style={{ color: '#F5A623' }}>{CTA.title.split(':')[1]}</span>
+            <span style={{ color: '#F5A623' }}>{CTA.titleHighlight}</span>
           </motion.h1>
         </div>
 
@@ -495,10 +495,12 @@ function CTAOverlay() {
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             transition={{ duration: 0.7, delay: 0.6, ease: smoothEase }}
-            className="text-xs md:text-sm tracking-[0.15em] font-light"
+            className="text-xs md:text-sm tracking-[0.15em] font-light leading-relaxed"
             style={{ color: 'rgba(245,213,168,0.7)' }}
           >
             {CTA.subtitle}
+            <br />
+            {CTA.subtitleHighlight}
           </motion.p>
         </div>
 
@@ -540,10 +542,12 @@ function CTAOverlay() {
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             transition={{ duration: 0.7, delay: 1.1, ease: smoothEase }}
-            className="text-base md:text-lg tracking-[0.15em] font-light"
+            className="text-base md:text-lg tracking-[0.15em] font-light leading-relaxed"
             style={{ color: 'rgba(245,213,168,0.7)' }}
           >
             {CTA.tagline}
+            <br />
+            <span style={{ color: '#F5A623' }}>{CTA.taglineHighlight}</span>
           </motion.p>
         </div>
 
